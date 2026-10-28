@@ -41,18 +41,14 @@ jobs:
           node-version: 22
       - name: Check JSON files
         run: |
-          for f in extension/manifest.json extension/_locales/*/messages.json docs/revoked.json; do
+          for f in extension/manifest.json extension/_locales/*/messages.json; do
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" && echo "ok  $f"
           done
       - name: Syntax check
-        run: for f in extension/*.js extension/lib/*.js tools/*.mjs; do node --check "$f"; done
+        run: for f in extension/*.js extension/lib/*.js; do node --check "$f"; done
       - name: Unit tests
         run: node --test tests/*.test.mjs
-      - name: Make sure no private key is committed
-        run: |
-          if grep -rlE '"d"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{40,}"' --include='*.json' --include='*.js' . ; then
-            echo "::error::A private key seems to be committed. Delete it and create a new key pair."; exit 1
-          fi
+
 
   release:
     needs: test

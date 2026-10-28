@@ -1,16 +1,11 @@
 // ClipTime — background service worker
 import { TOOLS, expandPlaceholders } from './lib/text-tools.js';
-import { CONFIG } from './lib/config.js';
-import { verifyLicenseKey, normalizeKey } from './lib/license.js';
-import { isLemonKey, lemonActivate, lemonValidate, lemonDeactivate, summarize, belongsToUs } from './lib/lemon.js';
-import { limitsFor, effectiveSettings } from './lib/plan.js';
-
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_TEXT = 200_000;
 
 export const DEFAULT_SETTINGS = {
   retentionDays: 30,       // 0 = keep forever
-  maxItems: 200,
+  maxItems: 1000,
   capture: true,           // save copies made in Chrome
   readSystemClipboard: true, // when popup opens, also save what's currently on the OS clipboard
   expandSnippets: true,    // type ;shortcut to expand a snippet
@@ -28,117 +23,13 @@ function serial(fn) {
   return run;
 }
 
-// ---------- license / plan ----------
-let planCache = null;
-async function getPlanInfo(force = false) {
-  if (!force && planCache && Date.now() - planCache.at < 60_000) return planCache;
-  const { license, revoked } = await chrome.storage.local.get(['license', 'revoked']);
-  let info = { plan: 'free', status: 'none' };
-  if (license && license.provider === 'lemon') {
-    info = lemonPlan(license);
-  } else if (license && license.key) {
-    const r = await verifyLicenseKey(license.key, CONFIG.LICENSE_PUBLIC_KEY);
-    if (r.valid && ((revoked && revoked.ids) || []).includes(r.payload.i)) info = { plan: 'free', status: 'revoked', payload: r.payload };
-    else if (r.valid) info = { plan: 'pro', status: 'active', payload: r.payload };
-    else info = { plan: 'free', status: r.reason, payload: r.payload || null };
-  }
-  planCache = { at: Date.now(), ...info };
-  return planCache;
-}
-
-// ---- International licenses (Lemon Squeezy) ----
-const lemonEnabled = () => !!(CONFIG.LEMON && CONFIG.LEMON.STORE_ID != null);
-
-function lemonPlan(license, now = Date.now()) {
-  const r = license.lemon || {};
-  const payload = { src: 'intl', e: r.email || '', i: String(license.key).slice(0, 8).toUpperCase(), x: r.expiresAt || 0, usage: r.usage, limit: r.limit, product: r.product || '' };
-  const grace = (CONFIG.LEMON.OFFLINE_GRACE_DAYS || 21) * DAY;
-  if (!lemonEnabled()) return { plan: 'free', status: 'nokey', payload };
-  if (r.status === 'disabled') return { plan: 'free', status: 'revoked', payload };
-  if (r.status === 'expired' || (r.expiresAt && now > r.expiresAt)) return { plan: 'free', status: 'expired', payload };
-  if (r.status !== 'active') return { plan: 'free', status: 'invalid', payload };
-  if (now - (license.lastValidated || 0) > grace) return { plan: 'free', status: 'offline', payload };
-  return { plan: 'pro', status: 'active', payload };
-}
-
-function instanceName() {
-  const ua = navigator.userAgentData;
-  const os = (ua && ua.platform) || (/Mac/.test(navigator.userAgent) ? 'macOS' : /Win/.test(navigator.userAgent) ? 'Windows' : /Linux/.test(navigator.userAgent) ? 'Linux' : 'Computer');
-  return `ClipTime · Chrome on ${os} · ${new Date().toISOString().slice(0, 10)}`;
-}
-
-async function activateLemon(key) {
-  if (!lemonEnabled()) return { ok: false, error: 'nokey' };
-  const api = CONFIG.LEMON.API_BASE;
-  const r = await lemonActivate(api, key, instanceName());
-  if (r.network) return { ok: false, error: 'network' };
-  const j = r.json || {};
-  const sum = summarize(j);
-  if (!j.activated) {
-    if (/limit/i.test(j.error || '')) return { ok: false, error: 'limit' };
-    if (sum.status === 'disabled') return { ok: false, error: 'revoked' };
-    if (sum.status === 'expired') return { ok: false, error: 'expired' };
-    return { ok: false, error: 'invalid' };
-  }
-  if (!belongsToUs(sum, CONFIG.LEMON)) {
-    if (j.instance && j.instance.id) await lemonDeactivate(api, key, j.instance.id);
-    return { ok: false, error: 'foreign' };
-  }
-  const now = Date.now();
-  await chrome.storage.local.set({ license: { provider: 'lemon', key, instanceId: j.instance && j.instance.id, activated: now, lastValidated: now, lemon: sum } });
-  planCache = null;
-  return { ok: true };
-}
-
-async function revalidateLemon(force = false) {
-  const { license } = await chrome.storage.local.get('license');
-  if (!license || license.provider !== 'lemon' || !lemonEnabled()) return;
-  const now = Date.now();
-  if (!force && now - (license.lastValidated || 0) < (CONFIG.LEMON.REVALIDATE_DAYS || 3) * DAY) return;
-  if (!force && now - (license.lastAttempt || 0) < 60 * 60 * 1000) return; // at most hourly when offline
-  const r = await lemonValidate(CONFIG.LEMON.API_BASE, license.key, license.instanceId);
-  const next = { ...license, lastAttempt: now };
-  if (!r.network && r.json) {
-    const sum = summarize(r.json);
-    if (r.json.valid) { next.lemon = sum; next.lastValidated = now; }
-    else {
-      // A definite "no": refunded/disabled, expired, or this computer's activation was removed
-      next.lemon = { ...(license.lemon || {}), ...sum, status: ['disabled', 'expired'].includes(sum.status) ? sum.status : 'invalid' };
-      next.lastValidated = now;
-    }
-  }
-  await chrome.storage.local.set({ license: next });
-  planCache = null;
-  await runPrune();
-}
-
-// Cancelled licenses: only checked when a license is installed, so free users make no network requests at all.
-async function checkRevoked() {
-  if (!CONFIG.REVOKED_URL) return;
-  const { license } = await chrome.storage.local.get('license');
-  if (!license || license.provider === 'lemon') return;
-  try {
-    const res = await fetch(CONFIG.REVOKED_URL, { cache: 'no-store', credentials: 'omit' });
-    if (!res.ok) return;
-    const j = await res.json();
-    const ids = (Array.isArray(j) ? j : j.revoked || []).map(String).slice(0, 20000);
-    await chrome.storage.local.set({ revoked: { ids, fetched: Date.now() } });
-    planCache = null;
-    await runPrune();
-  } catch {}
-}
-
 async function getAll() {
   const d = await chrome.storage.local.get(['history', 'snippets', 'settings']);
   const settings = { ...DEFAULT_SETTINGS, ...(d.settings || {}) };
-  const { plan } = await getPlanInfo();
   return {
     history: Array.isArray(d.history) ? d.history : [],
     snippets: Array.isArray(d.snippets) ? d.snippets : [],
     settings,
-    plan,
-    limits: limitsFor(plan),
-    eff: effectiveSettings(settings, plan),
   };
 }
 
@@ -175,7 +66,7 @@ function addItem({ text, url = '', title = '', source = 'copy' }, { force = fals
     if (!text.trim()) return { ok: false };
     if (text.length > MAX_TEXT) text = text.slice(0, MAX_TEXT);
 
-    const { history, settings, eff } = await getAll();
+    const { history, settings } = await getAll();
     if (!force && !settings.capture) return { ok: false, reason: 'paused' };
     if (url && isIgnored(url, settings)) return { ok: false, reason: 'ignored' };
 
@@ -191,7 +82,7 @@ function addItem({ text, url = '', title = '', source = 'copy' }, { force = fals
       item = { id: uid(), text, ts: now, created: now, url, title: String(title).slice(0, 200), source, pinned: false, count: 1 };
     }
     history.unshift(item);
-    await chrome.storage.local.set({ history: prune(history, eff, now) });
+    await chrome.storage.local.set({ history: prune(history, settings, now) });
     scheduleMenus();
     return { ok: true, id: item.id };
   });
@@ -202,7 +93,7 @@ function mutateHistory(fn) {
     const all = await getAll();
     const next = fn(all.history, all);
     if (next && next.error) return { ok: false, ...next };
-    await chrome.storage.local.set({ history: prune(next, all.eff) });
+    await chrome.storage.local.set({ history: prune(next, all.settings) });
     scheduleMenus();
     return { ok: true };
   });
@@ -342,7 +233,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       flashBadge(ok);
     } else if (id === 'sel-snippet') {
       const raw = await selectionFromTab(info, tab);
-      const r = await mutateSnippets((s, { limits }) => s.length >= limits.snippets ? { error: 'limit', feature: 'snippets' } : [
+      const r = await mutateSnippets((s) => [
         { id: uid(), title: clip(raw, 40), trigger: '', text: raw, created: Date.now(), updated: Date.now() },
         ...s,
       ]);
@@ -377,19 +268,14 @@ async function handle(msg, sender, fromExtPage) {
     case 'clip:delete':
       return mutateHistory((h) => h.filter((x) => x.id !== msg.id));
     case 'clip:pin':
-      return mutateHistory((h, { limits }) => {
-        const target = h.find((x) => x.id === msg.id);
-        if (target && !target.pinned && h.filter((x) => x.pinned).length >= limits.pins) return { error: 'limit', feature: 'pins' };
-        return h.map((x) => (x.id === msg.id ? { ...x, pinned: !x.pinned } : x));
-      });
+      return mutateHistory((h) => h.map((x) => (x.id === msg.id ? { ...x, pinned: !x.pinned } : x)));
     case 'clip:edit':
       return mutateHistory((h) => h.map((x) => (x.id === msg.id && typeof msg.text === 'string' && msg.text.trim() ? { ...x, text: msg.text } : x)));
     case 'clip:clear':
       return mutateHistory((h) => (msg.includePinned ? [] : h.filter((x) => x.pinned)));
     case 'snippet:save':
-      return mutateSnippets((list, { limits }) => {
+      return mutateSnippets((list) => {
         const s = msg.snippet || {};
-        if (!list.some((x) => x.id === s.id) && list.length >= limits.snippets) return { error: 'limit', feature: 'snippets' };
         const clean = {
           title: String(s.title || '').slice(0, 120),
           trigger: String(s.trigger || '').replace(/\s+/g, '').slice(0, 32),
@@ -410,12 +296,12 @@ async function handle(msg, sender, fromExtPage) {
       });
     case 'settings:save':
       return serial(async () => {
-        const { settings, history, plan } = await getAll();
+        const { settings, history } = await getAll();
         const next = { ...settings, ...(msg.settings || {}) };
         next.retentionDays = Math.max(0, Math.min(3650, Number(next.retentionDays) || 0));
         next.maxItems = Math.max(50, Math.min(10000, Number(next.maxItems) || DEFAULT_SETTINGS.maxItems));
         next.ignoreSites = (next.ignoreSites || []).map((s) => String(s).trim()).filter(Boolean).slice(0, 500);
-        await chrome.storage.local.set({ settings: next, history: prune(history, effectiveSettings(next, plan)) });
+        await chrome.storage.local.set({ settings: next, history: prune(history, next) });
         scheduleMenus();
         return { ok: true };
       });
@@ -423,7 +309,6 @@ async function handle(msg, sender, fromExtPage) {
       return serial(async () => {
         const data = msg.data || {};
         const cur = await getAll();
-        if (!cur.limits.backup) return { ok: false, error: 'limit', feature: 'backup' };
         const valid = (x) => x && typeof x.text === 'string' && x.text.trim();
         const hist = new Map(cur.history.map((h) => [h.text, h]));
         for (const h of (Array.isArray(data.history) ? data.history : []).filter(valid)) {
@@ -440,43 +325,10 @@ async function handle(msg, sender, fromExtPage) {
             .filter((s) => !snipIds.has(s.text))
             .map((s) => ({ id: uid(), title: String(s.title || ''), trigger: String(s.trigger || ''), text: s.text, created: Date.now(), updated: Date.now() })),
         ];
-        await chrome.storage.local.set({ history: prune(history, cur.eff), snippets });
+        await chrome.storage.local.set({ history: prune(history, cur.settings), snippets });
         scheduleMenus();
         return { ok: true, history: history.length, snippets: snippets.length };
       });
-    case 'plan:get': {
-      revalidateLemon().catch(() => {}); // refresh in the background if it's due
-      const info = await getPlanInfo(true);
-      return { ok: true, plan: info.plan, status: info.status, payload: info.payload || null, configured: !!CONFIG.LICENSE_PUBLIC_KEY || lemonEnabled() };
-    }
-    case 'license:activate': {
-      const key = normalizeKey(msg.key);
-      if (isLemonKey(key)) {
-        const lr = await activateLemon(key.toLowerCase());
-        if (!lr.ok) return lr;
-        await runPrune();
-        return { ok: true, payload: (await getPlanInfo(true)).payload };
-      }
-      const r = await verifyLicenseKey(key, CONFIG.LICENSE_PUBLIC_KEY);
-      if (!r.valid) return { ok: false, error: r.reason };
-      await chrome.storage.local.set({ license: { key, activated: Date.now() } });
-      planCache = null;
-      await checkRevoked();
-      const info = await getPlanInfo(true);
-      if (info.plan !== 'pro') return { ok: false, error: info.status };
-      return { ok: true, payload: info.payload };
-    }
-    case 'license:remove': {
-      const { license } = await chrome.storage.local.get('license');
-      // Free this computer's activation slot so the key can be used elsewhere
-      if (license && license.provider === 'lemon' && license.instanceId && lemonEnabled()) {
-        await lemonDeactivate(CONFIG.LEMON.API_BASE, license.key, license.instanceId).catch(() => {});
-      }
-      await chrome.storage.local.remove('license');
-      planCache = null;
-      await runPrune();
-      return { ok: true };
-    }
     case 'data:wipe':
       return serial(async () => {
         await chrome.storage.local.set({ history: [], snippets: [] });
@@ -516,6 +368,8 @@ async function injectIntoOpenTabs() {
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   const d = await chrome.storage.local.get(['settings', 'snippets']);
   if (!d.settings) await chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
+  await chrome.storage.local.remove(['license', 'revoked']); // left over from v1.2 (Pro licensing removed)
+  chrome.alarms.clear('license');
   if (!d.snippets && reason === 'install') {
     await chrome.storage.local.set({
       snippets: [
@@ -525,21 +379,17 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     });
   }
   chrome.alarms.create('prune', { periodInMinutes: 360 });
-  chrome.alarms.create('license', { periodInMinutes: 24 * 60, delayInMinutes: 1 });
   await runPrune();
   await buildMenus();
   injectIntoOpenTabs().catch(() => {});
 });
 
 chrome.runtime.onStartup.addListener(async () => {
-  revalidateLemon().catch(() => {});
   chrome.alarms.create('prune', { periodInMinutes: 360 });
-  chrome.alarms.create('license', { periodInMinutes: 24 * 60, delayInMinutes: 1 });
   await runPrune();
   await buildMenus();
 });
 
 chrome.alarms.onAlarm.addListener((a) => {
   if (a.name === 'prune') runPrune();
-  if (a.name === 'license') { checkRevoked(); revalidateLemon(); }
 });

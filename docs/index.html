@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClipTime – Clipboard History & Text Tools for Chrome</title>
-<meta name="description" content="Clipboard history saved for 30 days, one-click blank-line remover, case converter and reusable text snippets for Chrome.">
+<title>ClipTime – Free Clipboard History & Text Tools for Chrome</title>
+<meta name="description" content="Free and open-source Chrome extension: clipboard history saved for 30 days, one-click blank-line remover, case converter and reusable text snippets.">
 <link rel="icon" href="icon128.png">
 <style>
-  :root { --bg:#f6f4ef; --card:#fff; --ink:#1d1b16; --ink2:#5d584c; --ink3:#8f897b; --line:#e3dfd4; --accent:#0f766e; --accent2:#d9efec; --pin:#b45309; --pinbg:#fdf0dc; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#161512; --card:#201f1b; --ink:#eeebe3; --ink2:#b4ae9f; --ink3:#7e786b; --line:#34322c; --accent:#2dd4bf; --accent2:#123b37; --pin:#f59e0b; --pinbg:#3a2a10; } }
+  :root { --bg:#f6f4ef; --card:#fff; --ink:#1d1b16; --ink2:#5d584c; --ink3:#8f897b; --line:#e3dfd4; --accent:#0f766e; --accent2:#d9efec; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161512; --card:#201f1b; --ink:#eeebe3; --ink2:#b4ae9f; --ink3:#7e786b; --line:#34322c; --accent:#2dd4bf; --accent2:#123b37; } }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 "Segoe UI",system-ui,-apple-system,"Noto Sans Bengali","Nirmala UI","Hind Siliguri",sans-serif; }
   a { color:var(--accent); }
@@ -18,43 +18,26 @@
   .lang { margin-left:auto; display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
   .lang button { border:0; background:none; padding:4px 12px; font:inherit; font-size:13px; font-weight:600; color:var(--ink2); cursor:pointer; }
   .lang button.on { background:var(--ink); color:var(--bg); }
-  .hero { padding:36px 0 26px; display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:center; }
+  .hero { padding:36px 0 30px; display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:center; }
+  .badge { display:inline-block; background:var(--accent2); color:var(--accent); font-weight:700; font-size:13px; padding:3px 12px; border-radius:999px; margin-bottom:14px; }
   .hero h1 { font-size:clamp(30px,5vw,46px); line-height:1.15; margin:0 0 14px; letter-spacing:-.5px; }
   .hero p { color:var(--ink2); font-size:18px; margin:0 0 22px; }
   .hero img { width:100%; max-width:380px; justify-self:center; border-radius:12px; border:1px solid var(--line); box-shadow:0 20px 50px -20px rgba(0,0,0,.3); }
-  .btn { display:inline-block; text-decoration:none; font-weight:700; border-radius:10px; padding:12px 22px; border:2px solid var(--accent); color:var(--accent); margin:0 8px 8px 0; text-align:center; cursor:pointer; background:none; font-size:16px; font-family:inherit; }
+  .btn { display:inline-block; text-decoration:none; font-weight:700; border-radius:10px; padding:12px 22px; border:2px solid var(--accent); color:var(--accent); margin:0 8px 8px 0; }
   .btn.solid { background:var(--accent); color:#fff; }
-  .btn.wide { display:block; width:100%; margin:14px 0 0; }
-  h2 { font-size:28px; margin:0 0 18px; text-align:center; }
+  h2 { font-size:28px; margin:0 0 22px; text-align:center; }
   section { padding:40px 0; }
-  .plans, .pays { display:grid; grid-template-columns:1fr 1fr; gap:18px; max-width:780px; margin:0 auto; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px; }
-  .plan.pro { border:2px solid var(--pin); position:relative; }
-  .tag { position:absolute; top:-12px; right:18px; background:var(--pin); color:#fff; font-size:12px; font-weight:700; padding:2px 10px; border-radius:999px; }
-  .card h3 { margin:0; font-size:20px; }
-  .price { font-size:36px; font-weight:800; margin:6px 0 2px; }
-  .price small { font-size:14px; color:var(--ink3); font-weight:500; }
-  .plan ul { list-style:none; padding:0; margin:16px 0 0; }
-  .plan li { padding:6px 0 6px 26px; position:relative; border-top:1px solid var(--line); font-size:15px; }
-  .plan li::before { content:"✓"; position:absolute; left:4px; color:var(--accent); font-weight:800; }
-  .plan li.no { color:var(--ink3); } .plan li.no::before { content:"–"; color:var(--ink3); }
-  .pay h3 { display:flex; align-items:center; gap:8px; }
-  .pay .sub { color:var(--ink2); font-size:14px; margin:4px 0 12px; }
-  .logos { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
-  .logos span { font-size:12px; font-weight:700; border:1px solid var(--line); border-radius:6px; padding:2px 8px; color:var(--ink2); background:var(--bg); }
-  .steps { counter-reset:s; list-style:none; padding:0; margin:0; font-size:14.5px; }
-  .steps li { counter-increment:s; padding:8px 0 8px 36px; position:relative; }
-  .steps li::before { content:counter(s); position:absolute; left:0; top:7px; width:26px; height:26px; border-radius:50%; background:var(--accent2); color:var(--accent); display:grid; place-items:center; font-weight:800; font-size:13px; }
-  .methods { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
-  .method { border:1px solid var(--line); border-radius:10px; padding:6px 12px; background:var(--bg); }
-  .method b { display:block; font-size:12px; color:var(--ink3); font-weight:600; }
-  .method span { font-family:ui-monospace,Consolas,monospace; font-size:16px; font-weight:700; }
-  .note { background:var(--pinbg); color:var(--pin); border-radius:10px; padding:12px 14px; font-size:14px; max-width:780px; margin:18px auto 0; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .card .ic { font-size:26px; }
+  .card h3 { margin:6px 0 6px; font-size:17px; }
+  .card p { margin:0; color:var(--ink2); font-size:14.5px; }
   .faq details { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:0 auto 10px; max-width:780px; }
   .faq summary { font-weight:700; cursor:pointer; }
+  .oss { text-align:center; max-width:640px; margin:0 auto; color:var(--ink2); }
   footer { padding:30px 0 50px; text-align:center; color:var(--ink3); font-size:14px; }
   footer a { color:var(--ink2); }
-  @media (max-width:760px) { .hero, .plans, .pays { grid-template-columns:1fr; } }
+  @media (max-width:760px) { .hero, .grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -66,61 +49,35 @@
 
   <div class="hero">
     <div>
+      <span class="badge" data-t="badge"></span>
       <h1 data-t="h1"></h1>
       <p data-t="lead"></p>
       <a class="btn solid" id="install" href="#" data-t="install"></a>
-      <a class="btn" href="#buy" data-t="getPro"></a>
+      <a class="btn" href="https://github.com/niruvai/cliptime" data-t="source"></a>
     </div>
     <img src="popup.png" alt="ClipTime">
   </div>
 </div>
 
-<section id="pricing">
+<section>
   <div class="wrap">
-    <h2 data-t="plans"></h2>
-    <div class="plans">
-      <div class="card plan">
-        <h3>Free</h3>
-        <div class="price" data-t="free0"></div>
-        <ul>
-          <li data-t="f1"></li><li data-t="f2"></li><li data-t="f3"></li><li data-t="f4"></li><li data-t="f5"></li><li class="no" data-t="f6"></li>
-        </ul>
-      </div>
-      <div class="card plan pro">
-        <span class="tag" data-t="best"></span>
-        <h3>Pro</h3>
-        <div class="price"><span class="js-price"></span> <small data-t="once"></small></div>
-        <ul>
-          <li data-t="p1"></li><li data-t="p2"></li><li data-t="p3"></li><li data-t="p4"></li><li data-t="p5"></li><li data-t="p6"></li>
-        </ul>
-      </div>
+    <h2 data-t="featTitle"></h2>
+    <div class="grid">
+      <div class="card"><div class="ic">📋</div><h3 data-t="f1h"></h3><p data-t="f1"></p></div>
+      <div class="card"><div class="ic">💾</div><h3 data-t="f2h"></h3><p data-t="f2"></p></div>
+      <div class="card"><div class="ic">🧹</div><h3 data-t="f3h"></h3><p data-t="f3"></p></div>
+      <div class="card"><div class="ic">🔠</div><h3 data-t="f4h"></h3><p data-t="f4"></p></div>
+      <div class="card"><div class="ic">✍️</div><h3 data-t="f5h"></h3><p data-t="f5"></p></div>
+      <div class="card"><div class="ic">🔒</div><h3 data-t="f6h"></h3><p data-t="f6"></p></div>
     </div>
   </div>
 </section>
 
-<section id="buy">
-  <div class="wrap">
-    <h2 data-t="howBuy"></h2>
-    <div class="pays" id="pays">
-      <div class="card pay" id="pay-intl">
-        <h3>🌍 <span data-t="intlTitle"></span></h3>
-        <p class="sub" data-t="intlSub"></p>
-        <div class="logos"><span>Visa</span><span>Mastercard</span><span>Amex</span><span>PayPal</span><span>Apple Pay</span><span>Google Pay</span></div>
-        <ol class="steps"><li data-t="i1"></li><li data-t="i2"></li><li data-t="i3"></li></ol>
-        <a class="btn solid wide" id="checkout" href="#"><span data-t="payCard"></span> — <span class="js-usd"></span></a>
-      </div>
-      <div class="card pay" id="pay-bd">
-        <h3>🇧🇩 <span data-t="bdTitle"></span></h3>
-        <p class="sub" data-t="bdSub"></p>
-        <ol class="steps">
-          <li><span data-t="b1"></span> <b class="js-bdt"></b>:
-            <div class="methods" id="methods"></div></li>
-          <li><span data-t="b2"></span> <a id="wa" href="#" target="_blank" rel="noopener">WhatsApp</a> · <a id="mail" href="#" data-t="email"></a></li>
-          <li data-t="b3"></li>
-        </ol>
-      </div>
-    </div>
-    <p class="note" data-t="refund"></p>
+<section>
+  <div class="wrap oss">
+    <h2 data-t="ossTitle"></h2>
+    <p data-t="oss"></p>
+    <a class="btn" href="https://github.com/niruvai/cliptime/issues" data-t="issue"></a>
   </div>
 </section>
 
@@ -131,97 +88,61 @@
     <details><summary data-t="q2"></summary><p data-t="a2"></p></details>
     <details><summary data-t="q3"></summary><p data-t="a3"></p></details>
     <details><summary data-t="q4"></summary><p data-t="a4"></p></details>
-    <details><summary data-t="q5"></summary><p data-t="a5"></p></details>
   </div>
 </section>
 
-<footer class="wrap">© ClipTime · <a id="privacy" href="#" data-t="privacy"></a> · <a id="support" href="#" data-t="contact"></a></footer>
+<footer class="wrap">ClipTime · MIT License · <a href="https://github.com/niruvai/cliptime/blob/main/PRIVACY.md" data-t="privacy"></a> · <a href="https://github.com/niruvai/cliptime">GitHub</a></footer>
 
 <script>
-  // ===================== EDIT THIS / এখানে নিজের তথ্য বসান =====================
-  const SHOP = {
-    priceUSD: '$4.99',
-    priceBDT: '৳299',
-    chromeStoreUrl: 'https://chromewebstore.google.com/',     // your extension's Web Store link
-    lemonCheckoutUrl: '',  // Lemon Squeezy → Products → ClipTime Pro → Share → checkout link
-    methods: [ { name: 'bKash (Personal)', number: '01XXXXXXXXX' }, { name: 'Nagad', number: '01XXXXXXXXX' } ],
-    whatsapp: '8801XXXXXXXXX',   // country code, no +
-    email: 'you@example.com',
-    privacyUrl: 'https://github.com/niruvai/cliptime/blob/main/PRIVACY.md',
-    devices: 3,                  // same as the activation limit you set in Lemon Squeezy
-  };
-  // ==============================================================================
+  // Put your Chrome Web Store link here once the extension is published
+  const CHROME_STORE_URL = 'https://github.com/niruvai/cliptime/releases/latest';
 
   const T = {
     en: {
-      h1: 'Everything you copy,<br>remembered.', lead: 'Clipboard history for Chrome that survives restarts. Remove blank lines in one click, convert case, and keep reusable snippets.',
-      install: 'Add to Chrome — free', getPro: 'Get Pro', plans: 'Plans', free0: '$0', best: 'Best value', once: 'one-time · lifetime',
-      f1: 'History of up to 200 copies', f2: 'Kept for 30 days', f3: 'One-click blank-line remover', f4: 'UPPER / lower / Title / Sentence case', f5: '5 snippets, 5 pins', f6: 'Backup / restore',
-      p1: 'History of up to 10,000 copies', p2: 'Keep for 60 / 90 / 365 days or forever', p3: 'Unlimited snippets and pins', p4: 'All text tools: camelCase, snake_case, sort, numbering, strip HTML…', p5: 'Backup & restore', p6: 'All future Pro updates',
-      howBuy: 'Buy ClipTime Pro', intlTitle: 'International', intlSub: 'Pay by card, PayPal, Apple Pay or Google Pay. Your key arrives by email instantly.',
-      i1: 'Click the button and pay securely (prices shown in your currency, tax included).', i2: 'Your license key is emailed to you right away.', i3: 'ClipTime → ⚙ Settings → paste the key → Activate.',
-      payCard: 'Pay with card / PayPal', bdTitle: 'Bangladesh', bdSub: 'Pay with bKash or Nagad. Key sent within a few hours.',
-      b1: 'Send Money', b2: 'Send the TrxID and your email by', b3: 'Paste the key we send you in ClipTime → ⚙ Settings → Activate.', email: 'email',
-      refund: 'One license per person. Card purchases work on up to {n} computers. Not working? Contact us within 7 days for a full refund.',
-      faq: 'FAQ',
-      q1: 'Is my copied text sent anywhere?', a1: 'No. Everything stays in Chrome on your computer. ClipTime never uploads your history.',
-      q2: 'Does history survive a restart?', a2: 'Yes — it stays after you shut down Windows or Mac, and is cleaned up automatically after 30 days (or as long as you choose with Pro).',
-      q3: 'How do I use Pro on another computer?', a3: 'Paste the same key there. To move a key from an old computer, remove it in ⚙ Settings first. Move your history with Export / Import.',
-      q4: 'Is the payment secure?', a4: 'Card payments are processed by Lemon Squeezy, our reseller and merchant of record. We never see your card details.',
-      q5: 'What happens when ClipTime updates?', a5: 'Chrome installs updates automatically. Your history, snippets and license are kept.',
-      privacy: 'Privacy policy', contact: 'Contact',
+      badge: '100% free · open source', h1: 'Everything you copy,<br>remembered.',
+      lead: 'Clipboard history for Chrome that survives restarts. Remove blank lines in one click, convert case, and keep reusable snippets — free for everyone.',
+      install: 'Add to Chrome', source: 'View source on GitHub', featTitle: 'Everything included, for everyone',
+      f1h: 'Clipboard history', f1: 'Every text you copy or cut in Chrome is saved — including site "Copy" buttons. Search it instantly.',
+      f2h: 'Survives restarts', f2: 'Kept for 30 days by default (1 day to forever). Pin anything to keep it permanently.',
+      f3h: 'One-click clean', f3: 'Remove blank lines, extra spaces and HTML tags — from the popup or the right-click menu.',
+      f4h: 'Case converter', f4: 'UPPER, lower, Title, Sentence, camelCase, snake_case, kebab-case, sort and number lines, Bangla ↔ English digits.',
+      f5h: 'Reusable snippets', f5: 'Type a shortcut like ;sig in any text box and your saved text appears. Works in Gmail, Facebook, WhatsApp Web…',
+      f6h: 'Private by design', f6: 'No account, no tracking, no network requests. Password fields are never saved; exclude any site.',
+      ossTitle: 'Free and open source', oss: 'ClipTime is MIT-licensed. Read the code, report a bug, suggest a feature or send a pull request — everyone is welcome.',
+      issue: 'Report a bug / request a feature', faq: 'FAQ',
+      q1: 'Is it really free?', a1: 'Yes. Every feature is free for everyone, forever. There is no paid plan, no ads and no account.',
+      q2: 'Is my copied text sent anywhere?', a2: 'No. Everything stays in Chrome on your computer. ClipTime makes no network requests at all.',
+      q3: 'Does history survive a restart?', a3: 'Yes — it stays after you shut down Windows or Mac, and is cleaned up automatically after the period you choose.',
+      q4: 'How do I move my history to another computer?', a4: 'Settings → Export saves a backup file; Import it on the other computer.',
+      privacy: 'Privacy policy',
     },
     bn: {
-      h1: 'যা কপি করেন,<br>সব মনে রাখে।', lead: 'Chrome-এর জন্য ক্লিপবোর্ড হিস্ট্রি — কম্পিউটার বন্ধ করলেও থাকে। এক ক্লিকে ফাঁকা লাইন সরান, কেস বদলান, আর বারবার লেখা জিনিস স্নিপেটে রাখুন।',
-      install: 'Chrome-এ ফ্রি যোগ করুন', getPro: 'Pro কিনুন', plans: 'প্ল্যান', free0: '৳০', best: 'সেরা', once: 'একবারই · আজীবন',
-      f1: '২০০টি কপি পর্যন্ত হিস্ট্রি', f2: '৩০ দিন সংরক্ষণ', f3: 'এক ক্লিকে ফাঁকা লাইন সরানো', f4: 'UPPER / lower / Title / Sentence case', f5: '৫টি স্নিপেট, ৫টি পিন', f6: 'ব্যাকআপ / রিস্টোর',
-      p1: '১০,০০০ কপি পর্যন্ত হিস্ট্রি', p2: '৬০ / ৯০ / ৩৬৫ দিন বা সবসময় সংরক্ষণ', p3: 'আনলিমিটেড স্নিপেট ও পিন', p4: 'সব টেক্সট টুল: camelCase, snake_case, সাজানো, নম্বর, বাংলা সংখ্যা…', p5: 'ব্যাকআপ ও রিস্টোর', p6: 'ভবিষ্যতের সব Pro আপডেট',
-      howBuy: 'ClipTime Pro কিনুন', intlTitle: 'বিদেশ থেকে', intlSub: 'কার্ড, PayPal, Apple Pay বা Google Pay দিয়ে। কী সাথে সাথে ইমেইলে চলে যায়।',
-      i1: 'বাটনে চাপ দিয়ে নিরাপদে পেমেন্ট করুন।', i2: 'লাইসেন্স কী সাথে সাথে ইমেইলে আসবে।', i3: 'ClipTime → ⚙ সেটিংস → কী পেস্ট → চালু করুন।',
-      payCard: 'কার্ড / PayPal দিয়ে কিনুন', bdTitle: 'বাংলাদেশ থেকে', bdSub: 'bKash বা Nagad দিয়ে। কয়েক ঘণ্টার মধ্যে কী পাঠানো হয়।',
-      b1: 'Send Money করুন', b2: 'TrxID আর আপনার ইমেইল পাঠান —', b3: 'আমাদের পাঠানো কী ClipTime → ⚙ সেটিংস-এ পেস্ট করে চালু করুন।', email: 'ইমেইল',
-      refund: 'একটি লাইসেন্স একজনের জন্য। কার্ডে কেনা লাইসেন্স {n}টি কম্পিউটারে চলে। কাজ না করলে ৭ দিনের মধ্যে জানালে পুরো টাকা ফেরত।',
-      faq: 'প্রশ্ন ও উত্তর',
-      q1: 'আমার কপি করা লেখা কি কোথাও যায়?', a1: 'না। সব ডেটা আপনার কম্পিউটারের Chrome-এই থাকে।',
-      q2: 'কম্পিউটার বন্ধ করলে হিস্ট্রি থাকবে?', a2: 'হ্যাঁ। Windows বা Mac বন্ধ করে চালু করলেও থাকে; ৩০ দিন পর নিজে থেকে মুছে যায় (Pro-তে যতদিন চান)।',
-      q3: 'অন্য কম্পিউটারে Pro কীভাবে চালাব?', a3: 'একই কী সেখানে পেস্ট করুন। পুরনো কম্পিউটার থেকে সরাতে চাইলে আগে সেখানে ⚙ সেটিংস থেকে কী সরান। হিস্ট্রি নিতে Export / Import করুন।',
-      q4: 'পেমেন্ট কি নিরাপদ?', a4: 'কার্ড পেমেন্ট Lemon Squeezy প্রসেস করে। আপনার কার্ডের তথ্য আমরা কখনো দেখি না।',
-      q5: 'আপডেট হলে কী হবে?', a5: 'Chrome নিজে থেকেই আপডেট নেয়। হিস্ট্রি, স্নিপেট ও লাইসেন্স থেকে যায়।',
-      privacy: 'প্রাইভেসি পলিসি', contact: 'যোগাযোগ',
+      badge: '১০০% ফ্রি · ওপেন সোর্স', h1: 'যা কপি করেন,<br>সব মনে রাখে।',
+      lead: 'Chrome-এর জন্য ক্লিপবোর্ড হিস্ট্রি — কম্পিউটার বন্ধ করলেও থাকে। এক ক্লিকে ফাঁকা লাইন সরান, কেস বদলান, আর বারবার লেখা জিনিস স্নিপেটে রাখুন — সবার জন্য বিনামূল্যে।',
+      install: 'Chrome-এ যোগ করুন', source: 'GitHub-এ কোড দেখুন', featTitle: 'সব ফিচার, সবার জন্য',
+      f1h: 'ক্লিপবোর্ড হিস্ট্রি', f1: 'Chrome-এ যা কপি বা কাট করেন সব সেভ হয় — সাইটের "Copy" বাটনসহ। মুহূর্তে খুঁজে পাবেন।',
+      f2h: 'রিস্টার্টেও থাকে', f2: 'ডিফল্টে ৩০ দিন থাকে (১ দিন থেকে সবসময় পর্যন্ত বাছতে পারবেন)। পিন করলে কখনো মুছবে না।',
+      f3h: 'এক ক্লিকে পরিষ্কার', f3: 'ফাঁকা লাইন, বাড়তি স্পেস আর HTML ট্যাগ সরান — পপআপ বা রাইট-ক্লিক মেনু থেকে।',
+      f4h: 'কেস কনভার্টার', f4: 'UPPER, lower, Title, Sentence, camelCase, snake_case, kebab-case, লাইন সাজানো ও নম্বর, বাংলা ↔ ইংরেজি সংখ্যা।',
+      f5h: 'স্নিপেট', f5: 'যেকোনো টেক্সট বক্সে ;sig লিখলেই সেভ করা লেখা বসে যায়। Gmail, Facebook, WhatsApp Web সবখানে।',
+      f6h: 'প্রাইভেসি', f6: 'কোনো অ্যাকাউন্ট নেই, ট্র্যাকিং নেই, ইন্টারনেটে কিছু যায় না। পাসওয়ার্ড ফিল্ড কখনো সেভ হয় না।',
+      ossTitle: 'ফ্রি ও ওপেন সোর্স', oss: 'ClipTime MIT লাইসেন্সে উন্মুক্ত। কোড দেখুন, ভুল জানান, নতুন ফিচারের প্রস্তাব দিন বা নিজেই উন্নত করে পাঠান — সবাইকে স্বাগতম।',
+      issue: 'ভুল জানান / ফিচার চান', faq: 'প্রশ্ন ও উত্তর',
+      q1: 'সত্যিই কি ফ্রি?', a1: 'হ্যাঁ। সব ফিচার সবার জন্য সবসময় ফ্রি। কোনো পেইড প্ল্যান, বিজ্ঞাপন বা অ্যাকাউন্ট নেই।',
+      q2: 'আমার কপি করা লেখা কি কোথাও যায়?', a2: 'না। সব ডেটা আপনার কম্পিউটারের Chrome-এই থাকে। ClipTime ইন্টারনেটে কিছুই পাঠায় না।',
+      q3: 'কম্পিউটার বন্ধ করলে হিস্ট্রি থাকবে?', a3: 'হ্যাঁ। Windows বা Mac বন্ধ করে চালু করলেও থাকে; আপনার বাছা সময় পর নিজে থেকে মুছে যায়।',
+      q4: 'অন্য কম্পিউটারে হিস্ট্রি নেব কীভাবে?', a4: 'সেটিংস → Export করে ব্যাকআপ ফাইল রাখুন, তারপর অন্য কম্পিউটারে Import করুন।',
+      privacy: 'প্রাইভেসি পলিসি',
     },
   };
-
-  const $ = (s) => document.querySelector(s);
   function setLang(l) {
-    const d = T[l];
     document.documentElement.lang = l;
-    document.querySelectorAll('[data-t]').forEach((el) => { el.innerHTML = (d[el.dataset.t] || '').replace('{n}', SHOP.devices); });
+    document.querySelectorAll('[data-t]').forEach((el) => { el.innerHTML = T[l][el.dataset.t] || ''; });
     document.querySelectorAll('.lang button').forEach((b) => b.classList.toggle('on', b.dataset.l === l));
-    document.querySelectorAll('.js-price').forEach((e) => (e.textContent = l === 'bn' ? SHOP.priceBDT + ' / ' + SHOP.priceUSD : SHOP.priceUSD));
-    // Show the most relevant way to pay first
-    const pays = $('#pays');
-    if (l === 'bn') pays.prepend($('#pay-bd')); else pays.prepend($('#pay-intl'));
     try { localStorage.setItem('lang', l); } catch {}
   }
   document.querySelectorAll('.lang button').forEach((b) => (b.onclick = () => setLang(b.dataset.l)));
-
-  document.querySelectorAll('.js-usd').forEach((e) => (e.textContent = SHOP.priceUSD));
-  document.querySelectorAll('.js-bdt').forEach((e) => (e.textContent = SHOP.priceBDT));
-  $('#install').href = SHOP.chromeStoreUrl;
-  $('#privacy').href = SHOP.privacyUrl;
-  $('#support').href = 'mailto:' + SHOP.email;
-  if (SHOP.lemonCheckoutUrl) $('#checkout').href = SHOP.lemonCheckoutUrl;
-  else $('#checkout').onclick = (e) => { e.preventDefault(); alert('Checkout link not set yet (SHOP.lemonCheckoutUrl).'); };
-  for (const x of SHOP.methods) {
-    const d = document.createElement('div'); d.className = 'method';
-    d.innerHTML = '<b></b><span></span>';
-    d.querySelector('b').textContent = x.name; d.querySelector('span').textContent = x.number;
-    $('#methods').appendChild(d);
-  }
-  const msg = 'ClipTime Pro\nTrxID: \nEmail: ';
-  $('#wa').href = 'https://wa.me/' + SHOP.whatsapp + '?text=' + encodeURIComponent(msg);
-  $('#mail').href = 'mailto:' + SHOP.email + '?subject=' + encodeURIComponent('ClipTime Pro') + '&body=' + encodeURIComponent(msg);
-
+  document.getElementById('install').href = CHROME_STORE_URL;
   const q = new URLSearchParams(location.search).get('lang');
   let saved = null; try { saved = localStorage.getItem('lang'); } catch {}
   const auto = (navigator.language || '').startsWith('bn') || Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka' ? 'bn' : 'en';

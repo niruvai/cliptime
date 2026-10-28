@@ -185,30 +185,4 @@ select { border: 1px solid var(--line); border-radius: 7px; padding: 4px 6px; ba
 
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 2px solid var(--bg); }
-
-/* ---- Pro ---- */
-.pro-pill { border: 0; border-radius: 999px; padding: 1px 7px; font-size: 10px; font-weight: 800; letter-spacing: .6px; background: var(--surface-2); color: var(--ink-3); margin-left: 2px; }
-.pro-pill:hover { color: var(--pin); }
-body.is-pro .pro-pill { background: var(--pin-soft); color: var(--pin); }
-.tool.locked, option.locked { color: var(--ink-3); }
-.tool.locked::after { content: " 🔒"; font-size: 10px; }
-.pro-card { border-color: var(--pin); background: linear-gradient(180deg, var(--pin-soft), var(--surface) 70%); }
-.lic-row { display: flex; gap: 6px; margin-top: 4px; }
-.lic-row input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; background: var(--bg); font-family: var(--mono); font-size: 12px; outline: none; }
-.lic-row input:focus { border-color: var(--accent); }
-#lic-status.ok { color: var(--accent); font-weight: 600; }
-#lic-status.bad { color: var(--danger); }
-
-.modal { position: absolute; inset: 0; background: rgba(20, 18, 14, .45); display: flex; align-items: center; justify-content: center; z-index: 20; padding: 18px; }
-.modal-box { position: relative; width: 100%; max-width: 360px; background: var(--surface); border-radius: 14px; padding: 20px 20px 14px; box-shadow: 0 10px 40px rgba(0,0,0,.25); text-align: center; }
-.modal-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-size: 22px; color: var(--ink-3); line-height: 1; padding: 4px 8px; }
-.up-badge { display: inline-block; font-weight: 800; font-size: 11px; letter-spacing: 1px; color: var(--pin); background: var(--pin-soft); padding: 3px 10px; border-radius: 999px; }
-.modal-box h2 { font-size: 18px; margin: 10px 0 4px; }
-.up-reason { color: var(--danger); font-size: 12px; margin: 0 0 6px; min-height: 0; }
-.up-reason:empty { display: none; }
-.up-list { text-align: left; margin: 10px 0 12px; padding: 0; list-style: none; }
-.up-list li { padding: 4px 0 4px 22px; position: relative; font-size: 12.5px; }
-.up-list li::before { content: "✓"; position: absolute; left: 2px; color: var(--accent); font-weight: 800; }
-.up-price { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
-.up-price small { font-size: 12px; font-weight: 500; color: var(--ink-3); }
-.btn.wide { width: 100%; padding: 9px; margin-bottom: 6px; }
+.privacy a { color: var(--accent); }

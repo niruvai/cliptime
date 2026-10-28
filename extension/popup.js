@@ -1,11 +1,9 @@
 // ClipTime — popup / full-page UI
 import { TOOLS, stats, expandPlaceholders } from './lib/text-tools.js';
-import { CONFIG } from './lib/config.js';
-import { FREE_TOOLS, limitsFor } from './lib/plan.js';
 
 const DAY = 864e5;
 const RENDER_LIMIT = 300;
-const DEFAULTS = { retentionDays: 30, maxItems: 200, capture: true, readSystemClipboard: true, expandSnippets: true, ignoreSites: [] };
+const DEFAULTS = { retentionDays: 30, maxItems: 1000, capture: true, readSystemClipboard: true, expandSnippets: true, ignoreSites: [] };
 const LANG = chrome.i18n.getUILanguage();
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -13,9 +11,7 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const t = (k, subs) => chrome.i18n.getMessage(k, subs) || k;
 const send = (msg) => chrome.runtime.sendMessage(msg).catch((e) => ({ ok: false, error: String(e) }));
 
-const state = { history: [], snippets: [], settings: { ...DEFAULTS }, filter: 'all', query: '', snipQuery: '', kb: -1, plan: { plan: 'free', status: 'none' } };
-const isPro = () => state.plan.plan === 'pro';
-const limits = () => limitsFor(state.plan.plan);
+const state = { history: [], snippets: [], settings: { ...DEFAULTS }, filter: 'all', query: '', snipQuery: '', kb: -1 };
 const isFull = new URLSearchParams(location.search).has('full');
 
 // ---------- i18n ----------
@@ -160,8 +156,7 @@ $('#hist-list').addEventListener('click', async (e) => {
   if (!act) return copyText(h.text);
   e.stopPropagation();
   if (act === 'pin') {
-    const r = await send({ type: 'clip:pin', id: h.id });
-    if (r.error === 'limit') return openUpgrade('pins');
+    await send({ type: 'clip:pin', id: h.id });
     toast(t(h.pinned ? 'unpinnedToast' : 'pinnedToast'));
   }
   if (act === 'delete') { await send({ type: 'clip:delete', id: h.id }); toast(t('deleted')); }
@@ -213,7 +208,6 @@ toolText.addEventListener('input', updateStats);
 $$('.tool').forEach((b) => b.addEventListener('click', () => {
   const fn = TOOLS[b.dataset.tool];
   if (!fn) return;
-  if (b.classList.contains('locked')) return openUpgrade('tools');
   const before = toolText.value;
   const after = fn(before);
   if (after !== before) setToolText(after, true);
@@ -276,10 +270,7 @@ function openSnipForm(s = {}) {
 }
 function closeSnipForm() { $('#snip-form').hidden = true; renderSnippets(); }
 
-$('#snip-new').addEventListener('click', () => {
-  if (state.snippets.length >= limits().snippets) return openUpgrade('snippets');
-  openSnipForm();
-});
+$('#snip-new').addEventListener('click', () => openSnipForm());
 $('#snip-cancel').addEventListener('click', closeSnipForm);
 $('#snip-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -292,8 +283,7 @@ $('#snip-form').addEventListener('submit', async (e) => {
   if (!snippet.text.trim()) { $('#snip-text').focus(); return; }
   const clash = snippet.trigger && state.snippets.find((s) => s.trigger === snippet.trigger && s.id !== snippet.id);
   if (clash) { toast(t('triggerTaken')); $('#snip-trigger').focus(); return; }
-  const r = await send({ type: 'snippet:save', snippet });
-  if (r.error === 'limit') return openUpgrade('snippets');
+  await send({ type: 'snippet:save', snippet });
   toast(t('savedSnippet'));
   closeSnipForm();
 });
@@ -315,12 +305,10 @@ function renderSettings() {
   $('#set-capture').checked = s.capture !== false;
   $('#set-system').checked = s.readSystemClipboard !== false;
   $('#set-expand').checked = s.expandSnippets !== false;
-  const L = limits();
-  let ret = String(s.retentionDays ?? 30);
-  if (L.retentionDays > 0 && (Number(ret) === 0 || Number(ret) > L.retentionDays)) ret = String(L.retentionDays);
+  const ret = String(s.retentionDays ?? 30);
   if (![...$('#set-retention').options].some((o) => o.value === ret)) $('#set-retention').add(new Option(t('nDays', [fmtNum(ret)]), ret));
   $('#set-retention').value = ret;
-  const max = String(Math.min(Number(s.maxItems ?? 200), L.maxItems));
+  const max = String(s.maxItems ?? 1000);
   if (![...$('#set-max').options].some((o) => o.value === max)) $('#set-max').add(new Option(fmtNum(max), max));
   $('#set-max').value = max;
   if (document.activeElement !== $('#set-ignore')) $('#set-ignore').value = (s.ignoreSites || []).join('\n');
@@ -329,18 +317,8 @@ const saveSetting = (patch) => send({ type: 'settings:save', settings: patch });
 $('#set-capture').addEventListener('change', (e) => saveSetting({ capture: e.target.checked }));
 $('#set-system').addEventListener('change', (e) => saveSetting({ readSystemClipboard: e.target.checked }));
 $('#set-expand').addEventListener('change', (e) => saveSetting({ expandSnippets: e.target.checked }));
-function guardSelect(sel, key) {
-  sel.addEventListener('change', (e) => {
-    const opt = sel.selectedOptions[0];
-    if (opt && opt.classList.contains('locked')) {
-      renderSettings();
-      return openUpgrade(key === 'retentionDays' ? 'retention' : 'items');
-    }
-    saveSetting({ [key]: Number(e.target.value) });
-  });
-}
-guardSelect($('#set-retention'), 'retentionDays');
-guardSelect($('#set-max'), 'maxItems');
+$('#set-retention').addEventListener('change', (e) => saveSetting({ retentionDays: Number(e.target.value) }));
+$('#set-max').addEventListener('change', (e) => saveSetting({ maxItems: Number(e.target.value) }));
 $('#set-ignore').addEventListener('change', (e) => saveSetting({ ignoreSites: e.target.value.split(/[\n,]+/) }));
 
 async function showShortcut() {
@@ -353,7 +331,6 @@ async function showShortcut() {
 $('#open-shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 
 $('#export-btn').addEventListener('click', async () => {
-  if (!limits().backup) return openUpgrade('backup');
   const d = await chrome.storage.local.get(['history', 'snippets', 'settings']);
   const data = { app: 'ClipTime', version: chrome.runtime.getManifest().version, exported: new Date().toISOString(), ...d };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -364,7 +341,6 @@ $('#export-btn').addEventListener('click', async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 });
 $('#import-btn').addEventListener('click', () => {
-  if (!limits().backup) return openUpgrade('backup');
   // A file picker closes the toolbar popup, so import runs in a full tab
   if (!isFull) { chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?full=1#import') }); window.close(); return; }
   $('#import-file').click();
@@ -384,101 +360,6 @@ $('#wipe-btn').addEventListener('click', async () => {
   if (confirm(t('confirmWipe'))) { await send({ type: 'data:wipe' }); toast(t('deleted')); }
 });
 
-// ---------- Pro / license ----------
-const REASONS = { tools: 'upReasonTools', pins: 'upReasonPins', snippets: 'upReasonSnippets', backup: 'upReasonBackup', retention: 'upReasonRetention', items: 'upReasonItems' };
-function openUpgrade(reason) {
-  $('#up-reason').textContent = reason ? t(REASONS[reason] || '', [fmtNum(limits().snippets), fmtNum(limits().pins)]) : '';
-  $('#up-price').textContent = priceText();
-  $('#upgrade').hidden = false;
-  $('#up-buy').focus();
-}
-const closeUpgrade = () => { $('#upgrade').hidden = true; };
-$('#up-close').addEventListener('click', closeUpgrade);
-$('#upgrade').addEventListener('click', (e) => { if (e.target.id === 'upgrade') closeUpgrade(); });
-$('#up-have-key').addEventListener('click', () => { closeUpgrade(); showTab('settings'); $('#lic-key').focus(); });
-const inBangladesh = () => LANG.startsWith('bn') || Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka';
-const priceText = () => (inBangladesh() ? CONFIG.PRICE_TEXT_BD : CONFIG.PRICE_TEXT_INTL) || '';
-function openBuy() {
-  if (CONFIG.BUY_URL) {
-    const u = new URL(CONFIG.BUY_URL);
-    u.searchParams.set('lang', inBangladesh() ? 'bn' : 'en');
-    u.hash = 'buy';
-    chrome.tabs.create({ url: u.toString() });
-  }
-  else toast(t('buyNotSet'));
-}
-$('#up-buy').addEventListener('click', openBuy);
-$('#lic-buy').addEventListener('click', openBuy);
-$('#pro-pill').addEventListener('click', () => (isPro() ? showTab('settings') : openUpgrade()));
-
-$('#lic-activate').addEventListener('click', async () => {
-  const key = $('#lic-key').value.trim();
-  if (!key) return $('#lic-key').focus();
-  const btn = $('#lic-activate');
-  btn.disabled = true;
-  btn.textContent = t('checking');
-  const r = await send({ type: 'license:activate', key });
-  btn.disabled = false;
-  btn.textContent = t('activate');
-  if (r.ok) { $('#lic-key').value = ''; toast(t('licActivated')); }
-  else toast(t('licErr_' + (r.error || 'format')));
-  refreshPlan();
-});
-$('#lic-key').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#lic-activate').click(); });
-$('#lic-remove').addEventListener('click', async () => {
-  if (!confirm(t('licConfirmRemove'))) return;
-  await send({ type: 'license:remove' });
-  refreshPlan();
-});
-
-function fmtDate(ts) { return new Date(ts).toLocaleDateString(LANG, { year: 'numeric', month: 'short', day: 'numeric' }); }
-
-function renderPlan() {
-  const pro = isPro();
-  const p = state.plan;
-  document.body.classList.toggle('is-pro', pro);
-  $('#pro-pill').title = pro ? 'ClipTime Pro' : t('upTitle');
-  // lock advanced tools
-  for (const b of $$('.tool')) b.classList.toggle('locked', !pro && !FREE_TOOLS.has(b.dataset.tool));
-  // lock longer retention / larger history
-  const L = limits();
-  for (const o of $$('#set-retention option')) {
-    const v = Number(o.value);
-    const locked = L.retentionDays > 0 && (v === 0 || v > L.retentionDays);
-    o.classList.toggle('locked', locked);
-    o.textContent = (v === 0 ? t('forever') : t('nDays', [fmtNum(v)])) + (locked ? ' 🔒' : '');
-  }
-  for (const o of $$('#set-max option')) {
-    const locked = Number(o.value) > L.maxItems;
-    o.classList.toggle('locked', locked);
-    o.textContent = fmtNum(o.value) + (locked ? ' 🔒' : '');
-  }
-  // license card
-  const st = $('#lic-status');
-  st.className = '';
-  $('#lic-active').hidden = !p.payload || p.status === 'none';
-  $('#lic-form').hidden = pro;
-  $('#lic-buy').hidden = pro;
-  if (pro) {
-    st.className = 'ok';
-    st.textContent = p.payload.x ? t('licActiveUntil', [fmtDate(p.payload.x)]) : t('licActiveLifetime');
-  } else if (p.status === 'expired') { st.className = 'bad'; st.textContent = t('licErr_expired'); }
-  else if (p.status === 'revoked') { st.className = 'bad'; st.textContent = t('licErr_revoked'); }
-  else if (['offline', 'invalid'].includes(p.status) && p.payload) { st.className = 'bad'; st.textContent = t('licErr_' + p.status); }
-  else if (!p.configured) st.textContent = t('licNotConfigured');
-  else st.textContent = t('licFreeStatus', [fmtNum(L.maxItems), fmtNum(L.snippets)]);
-  let owner = p.payload ? t('licOwner', [p.payload.e || '—', p.payload.i]) : '';
-  if (p.payload && p.payload.src === 'intl' && p.payload.limit) owner += ' · ' + t('licDevices', [fmtNum(p.payload.usage ?? 1), fmtNum(p.payload.limit)]);
-  $('#lic-owner').textContent = owner;
-  renderSettings();
-}
-
-async function refreshPlan() {
-  const r = await send({ type: 'plan:get' });
-  if (r && r.ok) state.plan = r;
-  renderPlan();
-}
-
 // ---------- data ----------
 async function load() {
   const d = await chrome.storage.local.get(['history', 'snippets', 'settings']);
@@ -490,7 +371,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
   if (changes.history) { state.history = changes.history.newValue || []; renderHistory(); }
   if (changes.snippets) { state.snippets = changes.snippets.newValue || []; renderSnippets(); }
-  if (changes.license || changes.revoked) refreshPlan();
   if (changes.settings) { state.settings = { ...DEFAULTS, ...(changes.settings.newValue || {}) }; renderSettings(); renderHistory(); }
 });
 
@@ -505,7 +385,6 @@ async function captureSystemClipboard() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !$('#upgrade').hidden) { e.preventDefault(); closeUpgrade(); return; }
   if (e.key === 'Escape' && !$('#snip-form').hidden) { e.preventDefault(); closeSnipForm(); }
 });
 
@@ -518,8 +397,8 @@ document.addEventListener('keydown', (e) => {
   renderHistory();
   renderSnippets();
   renderSettings();
-  await refreshPlan();
   showShortcut();
+  $('#app-version').textContent = 'v' + chrome.runtime.getManifest().version;
   const hash = location.hash.slice(1);
   if (hash === 'import') { showTab('settings'); toast(t('importHint')); }
   else showTab(['history', 'tools', 'snippets', 'settings'].includes(hash) ? hash : 'history');

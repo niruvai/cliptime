@@ -1,6 +1,6 @@
 # ClipTime Privacy Policy
 
-_Last updated: 29 October 2026 (v1.2)_
+_Last updated: 29 October 2026 (v1.3)_
 
 ClipTime is a Chrome extension that keeps a history of text you copy, offers text-cleaning tools and stores reusable text snippets.
 
@@ -14,16 +14,9 @@ ClipTime is a Chrome extension that keeps a history of text you copy, offers tex
 
 All data is stored **only on your own computer**, inside Chrome's local extension storage (`chrome.storage.local`). It is not synced and is never sent to the developer or any third party.
 
-ClipTime contains no analytics, no tracking, no advertising and no remote code. Your copied text, history and snippets are never sent anywhere.
+ClipTime makes **no network requests**. It contains no analytics, no tracking, no advertising, no accounts and no remote code. Your copied text, history and snippets are never sent anywhere.
 
-## ClipTime Pro license
-
-If you activate ClipTime Pro, your license key is stored locally.
-
-- **Keys bought with bKash/Nagad** (starting with `CT1-`) contain the email address you gave when buying and a license ID. They are checked on your computer with a cryptographic signature, without contacting any server.
-- **Keys bought by card/PayPal** are sold by our reseller **Lemon Squeezy** (merchant of record). When you activate, and about every 3 days after that, ClipTime sends the license key, an activation ID and a label such as "ClipTime · Chrome on Windows" to Lemon Squeezy's License API (`api.lemonsqueezy.com`) to check that the key is valid. Lemon Squeezy returns the license status and the buyer's name and email, which are kept locally to show who the license belongs to. Removing the key also tells Lemon Squeezy to free that activation. Payment details are handled entirely by Lemon Squeezy under its own privacy policy; ClipTime never sees them.
-
-For `CT1-` keys, only when such a license is installed, ClipTime downloads a public list of cancelled license IDs once a day from the developer's GitHub repository. This request sends no personal data (not your email, history or license key). Users of the free version make no network requests at all.
+ClipTime is free and open source: anyone can read the code at https://github.com/niruvai/cliptime.
 
 ## How long it is kept
 
@@ -51,4 +44,4 @@ ClipTime does not sell, transfer or use your data for any purpose other than pro
 
 ## Contact
 
-Questions or concerns: open an issue on the project's GitHub page.
+Questions or concerns: open an issue at https://github.com/niruvai/cliptime/issues

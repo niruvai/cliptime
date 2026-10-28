@@ -37,10 +37,10 @@ UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_ca
 🔒 PRIVATE BY DESIGN
 Your data never leaves your computer. No account, no tracking, no network requests. Open source on GitHub.
 
-Shortcut: Alt+Shift+V opens ClipTime.
+💯 100% FREE & OPEN SOURCE
+Every feature is free for everyone — no account, no ads, no paid plan. Source code: https://github.com/niruvai/cliptime
 
-⭐ CLIPTIME PRO (optional one-time purchase — card, PayPal, Apple Pay, Google Pay, bKash, Nagad)
-Up to 10,000 items, keep history up to forever, unlimited snippets and pins, all advanced text tools, backup & restore.
+Shortcut: Alt+Shift+V opens ClipTime.
 
 ### বিস্তারিত বিবরণ (বাংলা)
 
@@ -51,6 +51,7 @@ ClipTime Chrome-এ আপনি যা কপি করেন সব মনে 
 🔠 কেস কনভার্টার — UPPERCASE, lowercase, Title Case, camelCase, snake_case ইত্যাদি; ইংরেজি ↔ বাংলা সংখ্যা।
 ✍️ স্নিপেট — যেকোনো টেক্সট বক্সে ;sig লিখলেই আপনার সিগনেচার বসে যাবে।
 🔒 সব ডেটা আপনার কম্পিউটারেই থাকে, কোথাও পাঠানো হয় না।
+💯 সম্পূর্ণ ফ্রি ও ওপেন সোর্স — কোনো অ্যাকাউন্ট, বিজ্ঞাপন বা পেইড প্ল্যান নেই।
 
 ### Graphics
 - Icon: `extension/icons/icon128.png`
@@ -78,15 +79,13 @@ ClipTime saves the text a user copies so they can find and reuse it later, and p
 | offscreen | Chrome requires an offscreen document to write to the clipboard from a context-menu action. |
 | scripting | After install/update, injects the content script into tabs that were already open so copying works without reloading them. |
 
-**Remote code:** No, I am not using remote code. (Network requests happen only for Pro users: checking a license key with the Lemon Squeezy License API, and downloading a JSON list of cancelled license IDs — data, not code.)
+**Remote code:** No, I am not using remote code. (ClipTime makes no network requests at all.)
 
-**In-app purchases:** In the Store listing / Distribution tab, mark that the item **contains in-app purchases** (Pro license sold outside the store).
+**In-app purchases:** None — leave "contains in-app purchases" unchecked.
 
 **Data usage — check these boxes:**
-- ☑ Website content (copied text) — *collected* only to provide the feature, stored locally
-- ☑ Web history (URL/title of the page where text was copied) — stored locally
-- ☑ Personally identifiable information (buyer's name/email attached to a Pro license) — stored locally
-- ☑ Authentication information (the Pro license key) — sent only to Lemon Squeezy's License API to verify the purchase
+- ☑ Website content (copied text) — handled only to provide the feature, stored locally, never transmitted
+- ☑ Web history (URL/title of the page where text was copied) — stored locally, never transmitted
 
 And certify:
 - ☑ I do not sell or transfer user data to third parties, outside of the approved use cases
