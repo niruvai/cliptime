@@ -1,0 +1,6 @@
+node_modules/
+*.zip
+.DS_Store
+# NEVER commit the license private key
+*PRIVATE*
+*private-key*

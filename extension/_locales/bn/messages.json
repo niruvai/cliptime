@@ -1,0 +1,461 @@
+{
+  "extName": {
+    "message": "ClipTime – ক্লিপবোর্ড হিস্ট্রি ও টেক্সট টুলস"
+  },
+  "extDesc": {
+    "message": "কপি করা লেখা ৩০ দিন সেভ থাকে, এক ক্লিকে ফাঁকা লাইন সরান, কেস কনভার্টার ও রিইউজেবল স্নিপেট। সব ডেটা আপনার কম্পিউটারেই।"
+  },
+  "actionTitle": {
+    "message": "ClipTime – ক্লিপবোর্ড হিস্ট্রি (Alt+Shift+V)"
+  },
+  "cmdOpen": {
+    "message": "ClipTime খুলুন"
+  },
+  "tabHistory": {
+    "message": "হিস্ট্রি"
+  },
+  "tabTools": {
+    "message": "টুলস"
+  },
+  "tabSnippets": {
+    "message": "স্নিপেট"
+  },
+  "tabSettings": {
+    "message": "সেটিংস"
+  },
+  "searchHistory": {
+    "message": "হিস্ট্রিতে খুঁজুন…"
+  },
+  "filterAll": {
+    "message": "সব"
+  },
+  "filterPinned": {
+    "message": "পিন করা"
+  },
+  "pausedBanner": {
+    "message": "সেভ করা বন্ধ আছে"
+  },
+  "resume": {
+    "message": "চালু করুন"
+  },
+  "emptyHistory": {
+    "message": "Chrome-এ কিছু কপি করুন — এখানে দেখা যাবে।"
+  },
+  "emptySearch": {
+    "message": "খোঁজার সাথে কিছু মেলেনি।"
+  },
+  "clearUnpinned": {
+    "message": "মুছুন (পিন করা বাদে)"
+  },
+  "toolPlaceholder": {
+    "message": "এখানে লেখা পেস্ট করুন বা লিখুন…"
+  },
+  "paste": {
+    "message": "পেস্ট"
+  },
+  "undo": {
+    "message": "আগের অবস্থা"
+  },
+  "clear": {
+    "message": "মুছুন"
+  },
+  "groupClean": {
+    "message": "পরিষ্কার করুন"
+  },
+  "toolRemoveBlank": {
+    "message": "ফাঁকা লাইন সরান"
+  },
+  "toolSmartClean": {
+    "message": "স্মার্ট ক্লিন"
+  },
+  "toolCollapse": {
+    "message": "সর্বোচ্চ ১টি ফাঁকা লাইন"
+  },
+  "toolSpaces": {
+    "message": "বাড়তি স্পেস সরান"
+  },
+  "toolTrim": {
+    "message": "লাইনের দুই পাশ ছাঁটুন"
+  },
+  "toolJoin": {
+    "message": "এক লাইনে জুড়ুন"
+  },
+  "toolStripHtml": {
+    "message": "HTML ট্যাগ সরান"
+  },
+  "groupCase": {
+    "message": "কেস কনভার্টার"
+  },
+  "groupLines": {
+    "message": "লাইন ও সংখ্যা"
+  },
+  "toolSort": {
+    "message": "সাজান A→Z"
+  },
+  "toolReverse": {
+    "message": "লাইন উল্টান"
+  },
+  "toolUnique": {
+    "message": "ডুপ্লিকেট সরান"
+  },
+  "toolNumber": {
+    "message": "নম্বর দিন"
+  },
+  "toolUnnumber": {
+    "message": "নম্বর সরান"
+  },
+  "toolUpper": {
+    "message": "UPPERCASE করে কপি"
+  },
+  "toolLower": {
+    "message": "lowercase করে কপি"
+  },
+  "toolTitle": {
+    "message": "Title Case করে কপি"
+  },
+  "toolSentence": {
+    "message": "Sentence case করে কপি"
+  },
+  "saveAsSnippet": {
+    "message": "স্নিপেট হিসেবে রাখুন"
+  },
+  "copy": {
+    "message": "কপি"
+  },
+  "searchSnippets": {
+    "message": "স্নিপেট খুঁজুন…"
+  },
+  "newSnippet": {
+    "message": "+ নতুন"
+  },
+  "snipTitle": {
+    "message": "শিরোনাম"
+  },
+  "snipTrigger": {
+    "message": "শর্টকাট"
+  },
+  "snipText": {
+    "message": "লেখা"
+  },
+  "snipHint": {
+    "message": "যেকোনো টেক্সট বক্সে শর্টকাট লিখলেই লেখাটা বসে যাবে। প্লেসহোল্ডার: {date} {time} {datetime}"
+  },
+  "cancel": {
+    "message": "বাতিল"
+  },
+  "save": {
+    "message": "সেভ"
+  },
+  "emptySnippets": {
+    "message": "যা বারবার লেখেন — ঠিকানা, উত্তর, সিগনেচার — এখানে রাখুন।"
+  },
+  "setCapture": {
+    "message": "যা কপি করি সেভ করো"
+  },
+  "setCaptureHint": {
+    "message": "ওয়েবপেজে কপি বা কাট করা লেখা সেভ হবে।"
+  },
+  "setSystem": {
+    "message": "অন্য অ্যাপের কপিও সেভ করো"
+  },
+  "setSystemHint": {
+    "message": "পপআপ খুললে ক্লিপবোর্ডে যা আছে তা সেভ হবে (যেমন Word থেকে কপি করা)।"
+  },
+  "setExpand": {
+    "message": "স্নিপেট শর্টকাট"
+  },
+  "setExpandHint": {
+    "message": "টেক্সট বক্সে ;শর্টকাট লিখলে স্নিপেট বসবে।"
+  },
+  "setRetention": {
+    "message": "হিস্ট্রি কতদিন থাকবে"
+  },
+  "setRetentionHint": {
+    "message": "পিন করা আইটেম কখনো মুছবে না।"
+  },
+  "setMax": {
+    "message": "সর্বোচ্চ আইটেম"
+  },
+  "setMaxHint": {
+    "message": "সবচেয়ে পুরনো (পিন ছাড়া) আগে মুছবে।"
+  },
+  "setIgnore": {
+    "message": "এই সাইটগুলো থেকে সেভ করবে না"
+  },
+  "setIgnoreHint": {
+    "message": "প্রতি লাইনে একটি ডোমেইন, যেমন mybank.com"
+  },
+  "setShortcut": {
+    "message": "কিবোর্ড শর্টকাট"
+  },
+  "change": {
+    "message": "বদলান"
+  },
+  "setBackup": {
+    "message": "ব্যাকআপ"
+  },
+  "setBackupHint": {
+    "message": "হিস্ট্রি ও স্নিপেট JSON ফাইলে।"
+  },
+  "export": {
+    "message": "এক্সপোর্ট"
+  },
+  "import": {
+    "message": "ইমপোর্ট"
+  },
+  "setWipe": {
+    "message": "সবকিছু মুছে ফেলুন"
+  },
+  "setWipeHint": {
+    "message": "হিস্ট্রি, পিন করা আইটেম ও স্নিপেট।"
+  },
+  "delete": {
+    "message": "মুছুন"
+  },
+  "privacyNote": {
+    "message": "সব ডেটা এই কম্পিউটারেই থাকে। ClipTime কোথাও কিছু পাঠায় না।"
+  },
+  "menuSelRoot": {
+    "message": "ClipTime: সিলেক্ট করা লেখা কপি…"
+  },
+  "menuCopyNoBlank": {
+    "message": "ফাঁকা লাইন ছাড়া কপি"
+  },
+  "menuCopyClean": {
+    "message": "পরিষ্কার করে কপি (স্পেস + ফাঁকা লাইন)"
+  },
+  "menuSaveSnippet": {
+    "message": "স্নিপেট হিসেবে রাখুন"
+  },
+  "menuEditRoot": {
+    "message": "ClipTime: বসান"
+  },
+  "menuSnippets": {
+    "message": "স্নিপেট"
+  },
+  "menuNoSnippets": {
+    "message": "এখনো কোনো স্নিপেট নেই"
+  },
+  "menuRecent": {
+    "message": "সাম্প্রতিক কপি"
+  },
+  "sampleSnipTitle": {
+    "message": "ধন্যবাদ বার্তা"
+  },
+  "sampleSnipText": {
+    "message": "যোগাযোগ করার জন্য ধন্যবাদ! আমি শীঘ্রই আপনাকে জানাব।"
+  },
+  "sampleDateTitle": {
+    "message": "আজকের তারিখ"
+  },
+  "copied": {
+    "message": "কপি হয়েছে"
+  },
+  "copiedClean": {
+    "message": "ফাঁকা লাইন ছাড়া কপি হয়েছে"
+  },
+  "deleted": {
+    "message": "মুছে ফেলা হয়েছে"
+  },
+  "pinnedToast": {
+    "message": "পিন হয়েছে — কখনো মুছবে না"
+  },
+  "unpinnedToast": {
+    "message": "পিন সরানো হয়েছে"
+  },
+  "savedSnippet": {
+    "message": "স্নিপেট সেভ হয়েছে"
+  },
+  "triggerTaken": {
+    "message": "এই শর্টকাট আগেই ব্যবহার হয়েছে"
+  },
+  "nItems": {
+    "message": "$1টি আইটেম"
+  },
+  "showingFirst": {
+    "message": "প্রথম $1টি দেখাচ্ছে"
+  },
+  "nChars": {
+    "message": "$1 অক্ষর"
+  },
+  "nDays": {
+    "message": "$1 দিন"
+  },
+  "forever": {
+    "message": "সবসময়"
+  },
+  "expiresIn": {
+    "message": "$1 দিনে মুছবে"
+  },
+  "pinnedLabel": {
+    "message": "পিন করা"
+  },
+  "fromOtherApp": {
+    "message": "অন্য অ্যাপ"
+  },
+  "justNow": {
+    "message": "এইমাত্র"
+  },
+  "statsLine": {
+    "message": "$1 অক্ষর · $2 শব্দ · $3 লাইন"
+  },
+  "nothingToCopy": {
+    "message": "কপি করার কিছু নেই"
+  },
+  "actPin": {
+    "message": "পিন করুন (কখনো মুছবে না)"
+  },
+  "actUnpin": {
+    "message": "পিন সরান"
+  },
+  "actClean": {
+    "message": "ফাঁকা লাইন ছাড়া কপি"
+  },
+  "actTools": {
+    "message": "টুলসে খুলুন"
+  },
+  "actDelete": {
+    "message": "মুছুন"
+  },
+  "actEdit": {
+    "message": "এডিট"
+  },
+  "confirmClear": {
+    "message": "পিন ছাড়া সব হিস্ট্রি মুছে ফেলবেন?"
+  },
+  "confirmWipe": {
+    "message": "সব হিস্ট্রি ও স্নিপেট মুছবেন? আর ফেরত আনা যাবে না।"
+  },
+  "confirmDeleteSnippet": {
+    "message": "এই স্নিপেট মুছবেন?"
+  },
+  "imported": {
+    "message": "ইমপোর্ট হয়েছে — $1টি হিস্ট্রি, $2টি স্নিপেট"
+  },
+  "importFailed": {
+    "message": "ফাইলটি পড়া যায়নি"
+  },
+  "importHint": {
+    "message": "ফাইল বাছতে আবার ইমপোর্ট চাপুন"
+  },
+  "noShortcut": {
+    "message": "সেট করা নেই"
+  },
+  "buyPro": {
+    "message": "Pro কিনুন"
+  },
+  "licEnterKey": {
+    "message": "কিনেছেন? লাইসেন্স কী পেস্ট করুন:"
+  },
+  "activate": {
+    "message": "চালু করুন"
+  },
+  "licRemove": {
+    "message": "কী সরান"
+  },
+  "upTitle": {
+    "message": "ClipTime Pro চালু করুন"
+  },
+  "upF1": {
+    "message": "বড় হিস্ট্রি — ১০,০০০ আইটেম পর্যন্ত"
+  },
+  "upF2": {
+    "message": "হিস্ট্রি রাখুন ৬০, ৯০, ৩৬৫ দিন বা সবসময়"
+  },
+  "upF3": {
+    "message": "আনলিমিটেড স্নিপেট ও পিন"
+  },
+  "upF4": {
+    "message": "সব টেক্সট টুল: camelCase, snake_case, সাজানো, নম্বর, বাংলা সংখ্যা, HTML সরানো"
+  },
+  "upF5": {
+    "message": "ব্যাকআপ ও রিস্টোর (এক্সপোর্ট / ইমপোর্ট)"
+  },
+  "upOnce": {
+    "message": "একবারই"
+  },
+  "upHaveKey": {
+    "message": "আমার কাছে কী আছে"
+  },
+  "upReasonTools": {
+    "message": "এই টুলটি Pro-তে আছে।"
+  },
+  "upReasonPins": {
+    "message": "ফ্রি প্ল্যানে $2টি পর্যন্ত পিন করা যায়।"
+  },
+  "upReasonSnippets": {
+    "message": "ফ্রি প্ল্যানে $1টি পর্যন্ত স্নিপেট রাখা যায়।"
+  },
+  "upReasonBackup": {
+    "message": "ব্যাকআপ ও রিস্টোর Pro-তে আছে।"
+  },
+  "upReasonRetention": {
+    "message": "ফ্রি প্ল্যানে হিস্ট্রি ৩০ দিন পর্যন্ত থাকে।"
+  },
+  "upReasonItems": {
+    "message": "বড় হিস্ট্রি Pro-তে আছে।"
+  },
+  "buyNotSet": {
+    "message": "কেনার পেজ এখনো সেট করা হয়নি"
+  },
+  "licActivated": {
+    "message": "Pro চালু হয়েছে — ধন্যবাদ! 🎉"
+  },
+  "licErr_format": {
+    "message": "এটা ClipTime-এর কী মনে হচ্ছে না"
+  },
+  "licErr_signature": {
+    "message": "লাইসেন্স কী সঠিক নয়"
+  },
+  "licErr_expired": {
+    "message": "এই লাইসেন্সের মেয়াদ শেষ"
+  },
+  "licErr_revoked": {
+    "message": "এই লাইসেন্স বাতিল করা হয়েছে"
+  },
+  "licErr_nokey": {
+    "message": "এই ভার্সনে লাইসেন্স সেট করা নেই"
+  },
+  "licErr_none": {
+    "message": "চালু করা যায়নি"
+  },
+  "licConfirmRemove": {
+    "message": "এই কম্পিউটার থেকে লাইসেন্স কী সরাবেন?"
+  },
+  "licActiveUntil": {
+    "message": "$1 পর্যন্ত চালু"
+  },
+  "licActiveLifetime": {
+    "message": "চালু — আজীবন"
+  },
+  "licNotConfigured": {
+    "message": "ফ্রি ভার্সন"
+  },
+  "licFreeStatus": {
+    "message": "ফ্রি: $1টি আইটেম, $2টি স্নিপেট, ৩০ দিন"
+  },
+  "licOwner": {
+    "message": "লাইসেন্স: $1 · ID $2"
+  },
+  "checking": {
+    "message": "যাচাই হচ্ছে…"
+  },
+  "licErr_network": {
+    "message": "ইন্টারনেট নেই — সংযোগ দিয়ে আবার চেষ্টা করুন"
+  },
+  "licErr_limit": {
+    "message": "এই কী সর্বোচ্চ সংখ্যক কম্পিউটারে ব্যবহার হয়ে গেছে"
+  },
+  "licErr_foreign": {
+    "message": "এই কী অন্য কোনো প্রোডাক্টের"
+  },
+  "licErr_invalid": {
+    "message": "লাইসেন্স কী বৈধ নয়"
+  },
+  "licErr_offline": {
+    "message": "অনেকদিন লাইসেন্স যাচাই করা যায়নি — ইন্টারনেটে সংযোগ দিন"
+  },
+  "licDevices": {
+    "message": "$2টির মধ্যে $1টি কম্পিউটার"
+  }
+}

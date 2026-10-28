@@ -1,0 +1,150 @@
+# Push a new version → test → GitHub Release → Chrome Web Store upload & publish.
+# After Google's review passes, every user's Chrome updates automatically (usually within a few hours).
+#
+# Two ways to release:
+#   A) Change "version" in extension/manifest.json and push to main.
+#   B) GitHub → Actions → "Test & Release" → Run workflow → choose patch / minor / major
+#      (the workflow bumps the version and commits it for you).
+#
+# Chrome Web Store publishing needs these repository secrets (Settings → Secrets and variables → Actions):
+#   CWS_CLIENT_ID, CWS_CLIENT_SECRET, CWS_REFRESH_TOKEN, CWS_PUBLISHER_ID, CWS_EXTENSION_ID
+# Without them the workflow still builds the zip and the GitHub Release; you upload it by hand.
+
+name: Test & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump'
+        type: choice
+        options: [patch, minor, major, none]
+        default: patch
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JSON files
+        run: |
+          for f in extension/manifest.json extension/_locales/*/messages.json docs/revoked.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" && echo "ok  $f"
+          done
+      - name: Syntax check
+        run: for f in extension/*.js extension/lib/*.js tools/*.mjs; do node --check "$f"; done
+      - name: Unit tests
+        run: node --test tests/*.test.mjs
+      - name: Make sure no private key is committed
+        run: |
+          if grep -rlE '"d"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_-]{40,}"' --include='*.json' --include='*.js' . ; then
+            echo "::error::A private key seems to be committed. Delete it and create a new key pair."; exit 1
+          fi
+
+  release:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version (manual run only)
+        if: github.event_name == 'workflow_dispatch' && inputs.bump != 'none'
+        run: |
+          node -e "
+            const fs=require('fs'); const f='extension/manifest.json';
+            const m=JSON.parse(fs.readFileSync(f,'utf8'));
+            let [a,b,c]=m.version.split('.').map(Number);
+            const k='${{ inputs.bump }}';
+            if(k==='major'){a++;b=0;c=0}else if(k==='minor'){b++;c=0}else{c++}
+            m.version=[a,b,c].join('.');
+            fs.writeFileSync(f, JSON.stringify(m,null,2)+'\n');
+            console.log('New version', m.version);"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Release v$(node -p "require('./extension/manifest.json').version")"
+          git push
+
+      - name: Is this a new version?
+        id: ver
+        run: |
+          V=$(node -p "require('./extension/manifest.json').version")
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$V" >/dev/null; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            echo "v$V is already released — nothing to publish. Increase the version in extension/manifest.json to release."
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build zip
+        if: steps.ver.outputs.new == 'true'
+        run: cd extension && zip -r -X "../cliptime-v${{ steps.ver.outputs.version }}.zip" . -x '*.DS_Store'
+
+      - name: GitHub Release
+        if: steps.ver.outputs.new == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          target_commitish: ${{ steps.ver.outputs.sha }}
+          files: cliptime-v${{ steps.ver.outputs.version }}.zip
+          generate_release_notes: true
+
+      - name: Publish to Chrome Web Store
+        if: steps.ver.outputs.new == 'true'
+        env:
+          CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          ZIP: cliptime-v${{ steps.ver.outputs.version }}.zip
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ -z "$REFRESH_TOKEN" ] || [ -z "$PUBLISHER_ID" ] || [ -z "$EXTENSION_ID" ]; then
+            echo "::warning::Chrome Web Store secrets are not set — upload $ZIP from the GitHub Release by hand."
+            exit 0
+          fi
+          API="https://chromewebstore.googleapis.com"
+          ITEM="publishers/$PUBLISHER_ID/items/$EXTENSION_ID"
+
+          TOKEN=$(curl -sS https://oauth2.googleapis.com/token \
+            -d client_id="$CLIENT_ID" -d client_secret="$CLIENT_SECRET" \
+            -d refresh_token="$REFRESH_TOKEN" -d grant_type=refresh_token | jq -r .access_token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then echo "::error::Could not get an access token (check the CWS_* secrets)"; exit 1; fi
+
+          echo "Uploading $ZIP …"
+          UP=$(curl -sS -X POST -H "Authorization: Bearer $TOKEN" -T "$ZIP" "$API/upload/v2/$ITEM:upload")
+          echo "$UP"
+          if echo "$UP" | grep -q '"error"\|FAILED'; then echo "::error::Upload failed"; exit 1; fi
+
+          # Large uploads are processed in the background — wait until done
+          for i in $(seq 1 20); do
+            echo "$UP" | grep -q 'IN_PROGRESS' || break
+            sleep 6
+            UP=$(curl -sS -H "Authorization: Bearer $TOKEN" "$API/v2/$ITEM:fetchStatus")
+            echo "$UP"
+            if echo "$UP" | grep -q 'FAILED'; then echo "::error::Upload processing failed"; exit 1; fi
+          done
+
+          echo "Submitting for review & publish …"
+          PUB=$(curl -sS -X POST -H "Authorization: Bearer $TOKEN" "$API/v2/$ITEM:publish")
+          echo "$PUB"
+          if echo "$PUB" | grep -q '"error"'; then echo "::error::Publish request failed"; exit 1; fi
+          echo "### ✅ v${{ steps.ver.outputs.version }} submitted to the Chrome Web Store" >> "$GITHUB_STEP_SUMMARY"
+          echo "Users will get it automatically after Google's review." >> "$GITHUB_STEP_SUMMARY"

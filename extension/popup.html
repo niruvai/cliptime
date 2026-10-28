@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClipTime</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <img src="icons/icon32.png" alt="" width="22" height="22">
+      <span>ClipTime</span>
+      <button id="pro-pill" class="pro-pill" type="button">PRO</button>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="history" class="tab active" data-i18n="tabHistory">History</button>
+      <button role="tab" data-tab="tools" class="tab" data-i18n="tabTools">Tools</button>
+      <button role="tab" data-tab="snippets" class="tab" data-i18n="tabSnippets">Snippets</button>
+      <button role="tab" data-tab="settings" class="tab icon-tab" data-i18n-title="tabSettings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.58-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64L4.57 11c-.04.32-.07.65-.07.98s.03.65.07.97l-2.11 1.66a.5.5 0 0 0-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.74 1.69.99l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65a7.7 7.7 0 0 0 1.69-.99l2.49 1.01c.23.08.49 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.66Z"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <!-- HISTORY -->
+  <section class="panel active" id="panel-history">
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z"/></svg>
+        <input id="hist-search" type="search" data-i18n-placeholder="searchHistory" placeholder="Search history" autocomplete="off">
+      </div>
+      <div class="chips">
+        <button class="chip active" data-filter="all" data-i18n="filterAll">All</button>
+        <button class="chip" data-filter="pinned" data-i18n="filterPinned">Pinned</button>
+      </div>
+    </div>
+    <div id="paused-banner" class="banner" hidden>
+      <span data-i18n="pausedBanner">Saving is paused.</span>
+      <button class="link" id="resume-btn" data-i18n="resume">Resume</button>
+    </div>
+    <ul id="hist-list" class="list" tabindex="-1"></ul>
+    <div id="hist-empty" class="empty" hidden>
+      <div class="empty-art">⌘C</div>
+      <p data-i18n="emptyHistory">Copy some text in Chrome — it will appear here.</p>
+    </div>
+    <footer class="foot">
+      <span id="hist-count" class="muted"></span>
+      <button class="link danger" id="clear-btn" data-i18n="clearUnpinned">Clear (keep pinned)</button>
+    </footer>
+  </section>
+
+  <!-- TOOLS -->
+  <section class="panel" id="panel-tools">
+    <div class="tools-body">
+      <textarea id="tool-text" spellcheck="false" data-i18n-placeholder="toolPlaceholder" placeholder="Paste or type text here…"></textarea>
+      <div class="statline">
+        <span id="tool-stats" class="muted"></span>
+        <span class="spacer"></span>
+        <button class="link" id="tool-paste" data-i18n="paste">Paste</button>
+        <button class="link" id="tool-undo" data-i18n="undo" disabled>Undo</button>
+        <button class="link" id="tool-clear" data-i18n="clear">Clear</button>
+      </div>
+
+      <h3 data-i18n="groupClean">Clean up</h3>
+      <div class="btn-grid">
+        <button class="tool primary" data-tool="removeBlankLines" data-i18n="toolRemoveBlank">Remove blank lines</button>
+        <button class="tool" data-tool="smartClean" data-i18n="toolSmartClean">Smart clean</button>
+        <button class="tool" data-tool="collapseBlankLines" data-i18n="toolCollapse">Max 1 blank line</button>
+        <button class="tool" data-tool="removeExtraSpaces" data-i18n="toolSpaces">Remove extra spaces</button>
+        <button class="tool" data-tool="trimLines" data-i18n="toolTrim">Trim lines</button>
+        <button class="tool" data-tool="joinLines" data-i18n="toolJoin">Join into one line</button>
+        <button class="tool" data-tool="stripHtml" data-i18n="toolStripHtml">Strip HTML</button>
+      </div>
+
+      <h3 data-i18n="groupCase">Case</h3>
+      <div class="btn-grid">
+        <button class="tool" data-tool="upper">UPPERCASE</button>
+        <button class="tool" data-tool="lower">lowercase</button>
+        <button class="tool" data-tool="title">Title Case</button>
+        <button class="tool" data-tool="sentence">Sentence case</button>
+        <button class="tool" data-tool="toggle">tOGGLE cASE</button>
+        <button class="tool" data-tool="camel">camelCase</button>
+        <button class="tool" data-tool="pascal">PascalCase</button>
+        <button class="tool" data-tool="snake">snake_case</button>
+        <button class="tool" data-tool="kebab">kebab-case</button>
+        <button class="tool" data-tool="constant">CONSTANT_CASE</button>
+      </div>
+
+      <h3 data-i18n="groupLines">Lines &amp; numbers</h3>
+      <div class="btn-grid">
+        <button class="tool" data-tool="sortLines" data-i18n="toolSort">Sort A→Z</button>
+        <button class="tool" data-tool="reverseLines" data-i18n="toolReverse">Reverse lines</button>
+        <button class="tool" data-tool="uniqueLines" data-i18n="toolUnique">Remove duplicates</button>
+        <button class="tool" data-tool="numberLines" data-i18n="toolNumber">Number lines</button>
+        <button class="tool" data-tool="removeNumbering" data-i18n="toolUnnumber">Remove numbering</button>
+        <button class="tool" data-tool="toBnDigits">123 → ১২৩</button>
+        <button class="tool" data-tool="toEnDigits">১২৩ → 123</button>
+      </div>
+    </div>
+    <footer class="foot sticky">
+      <button class="btn ghost" id="tool-save-snippet" data-i18n="saveAsSnippet">Save as snippet</button>
+      <button class="btn solid" id="tool-copy" data-i18n="copy">Copy</button>
+    </footer>
+  </section>
+
+  <!-- SNIPPETS -->
+  <section class="panel" id="panel-snippets">
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z"/></svg>
+        <input id="snip-search" type="search" data-i18n-placeholder="searchSnippets" placeholder="Search snippets" autocomplete="off">
+      </div>
+      <button class="btn solid small" id="snip-new" data-i18n="newSnippet">+ New</button>
+    </div>
+
+    <form id="snip-form" class="snip-form" hidden>
+      <input type="hidden" id="snip-id">
+      <div class="row2">
+        <label><span data-i18n="snipTitle">Title</span><input id="snip-title" maxlength="120"></label>
+        <label class="narrow"><span data-i18n="snipTrigger">Shortcut</span><input id="snip-trigger" maxlength="32" placeholder=";addr" spellcheck="false"></label>
+      </div>
+      <label><span data-i18n="snipText">Text</span><textarea id="snip-text" rows="5" spellcheck="false"></textarea></label>
+      <p class="hint" data-i18n="snipHint">Type the shortcut in any text box to insert it. Placeholders: {date} {time} {datetime}</p>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="snip-cancel" data-i18n="cancel">Cancel</button>
+        <button type="submit" class="btn solid" data-i18n="save">Save</button>
+      </div>
+    </form>
+
+    <ul id="snip-list" class="list"></ul>
+    <div id="snip-empty" class="empty" hidden>
+      <div class="empty-art">✎</div>
+      <p data-i18n="emptySnippets">Save text you type often — addresses, replies, signatures.</p>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="panel" id="panel-settings">
+    <div class="settings">
+      <div class="set-group pro-card" id="license-card">
+        <div class="set-row">
+          <span><b>ClipTime Pro</b><small id="lic-status"></small></span>
+          <button class="btn solid small" id="lic-buy" data-i18n="buyPro">Buy Pro</button>
+        </div>
+        <div class="set-col" id="lic-form">
+          <small data-i18n="licEnterKey">Paste the license key you received:</small>
+          <div class="lic-row">
+            <input id="lic-key" spellcheck="false" autocomplete="off" placeholder="CT1-…  /  XXXXXXXX-XXXX-…">
+            <button class="btn ghost small" id="lic-activate" data-i18n="activate">Activate</button>
+          </div>
+        </div>
+        <div class="set-row" id="lic-active" hidden>
+          <span><small id="lic-owner"></small></span>
+          <button class="link danger" id="lic-remove" data-i18n="licRemove">Remove key</button>
+        </div>
+      </div>
+      <div class="set-group">
+        <label class="set-row">
+          <span><b data-i18n="setCapture">Save what I copy</b><small data-i18n="setCaptureHint">Records text copied or cut on web pages.</small></span>
+          <input type="checkbox" class="switch" id="set-capture">
+        </label>
+        <label class="set-row">
+          <span><b data-i18n="setSystem">Also save other apps' copies</b><small data-i18n="setSystemHint">When this popup opens, saves what's on the clipboard (e.g. copied from Word).</small></span>
+          <input type="checkbox" class="switch" id="set-system">
+        </label>
+        <label class="set-row">
+          <span><b data-i18n="setExpand">Snippet shortcuts</b><small data-i18n="setExpandHint">Type ;shortcut in a text box to insert a snippet.</small></span>
+          <input type="checkbox" class="switch" id="set-expand">
+        </label>
+      </div>
+
+      <div class="set-group">
+        <label class="set-row">
+          <span><b data-i18n="setRetention">Keep history for</b><small data-i18n="setRetentionHint">Pinned items are never deleted.</small></span>
+          <select id="set-retention">
+            <option value="1">1</option>
+            <option value="7">7</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="60">60</option>
+            <option value="90">90</option>
+            <option value="365">365</option>
+            <option value="0">∞</option>
+          </select>
+        </label>
+        <label class="set-row">
+          <span><b data-i18n="setMax">Maximum items</b><small data-i18n="setMaxHint">Oldest unpinned items are removed first.</small></span>
+          <select id="set-max">
+            <option value="200">200</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="2000">2000</option>
+            <option value="5000">5000</option>
+            <option value="10000">10000</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="set-group">
+        <label class="set-col">
+          <b data-i18n="setIgnore">Never save from these sites</b>
+          <small data-i18n="setIgnoreHint">One domain per line, e.g. mybank.com</small>
+          <textarea id="set-ignore" rows="3" spellcheck="false" placeholder="mybank.com"></textarea>
+        </label>
+      </div>
+
+      <div class="set-group">
+        <div class="set-row">
+          <span><b data-i18n="setShortcut">Keyboard shortcut</b><small id="shortcut-now"></small></span>
+          <button class="btn ghost small" id="open-shortcuts" data-i18n="change">Change</button>
+        </div>
+        <div class="set-row">
+          <span><b data-i18n="setBackup">Backup</b><small data-i18n="setBackupHint">History + snippets as a JSON file.</small></span>
+          <span class="btns">
+            <button class="btn ghost small" id="export-btn" data-i18n="export">Export</button>
+            <button class="btn ghost small" id="import-btn" data-i18n="import">Import</button>
+            <input type="file" id="import-file" accept="application/json,.json" hidden>
+          </span>
+        </div>
+        <div class="set-row">
+          <span><b data-i18n="setWipe">Delete everything</b><small data-i18n="setWipeHint">History, pinned items and snippets.</small></span>
+          <button class="btn danger small" id="wipe-btn" data-i18n="delete">Delete</button>
+        </div>
+      </div>
+      <p class="privacy" data-i18n="privacyNote">Everything stays on this computer. ClipTime never sends your data anywhere.</p>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="upgrade" class="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="up-title">
+      <button class="modal-x" id="up-close" aria-label="Close">×</button>
+      <div class="up-badge">PRO</div>
+      <h2 id="up-title" data-i18n="upTitle">Unlock ClipTime Pro</h2>
+      <p id="up-reason" class="up-reason"></p>
+      <ul class="up-list">
+        <li data-i18n="upF1">Unlimited history — up to 10,000 items</li>
+        <li data-i18n="upF2">Keep history 60, 90, 365 days or forever</li>
+        <li data-i18n="upF3">Unlimited snippets and pins</li>
+        <li data-i18n="upF4">All text tools: camelCase, snake_case, sort, number lines, Bangla digits, strip HTML</li>
+        <li data-i18n="upF5">Backup &amp; restore (export / import)</li>
+      </ul>
+      <div class="up-price"><span id="up-price"></span> <small data-i18n="upOnce">one-time</small></div>
+      <button class="btn solid wide" id="up-buy" data-i18n="buyPro">Buy Pro</button>
+      <button class="link" id="up-have-key" data-i18n="upHaveKey">I already have a key</button>
+    </div>
+  </div>
+</div>
+<template id="tpl-item">
+  <li class="item" tabindex="0">
+    <div class="item-main">
+      <div class="item-text"></div>
+      <div class="item-meta"></div>
+    </div>
+    <div class="item-actions">
+      <button class="ia pin" data-act="pin"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M16 9V4h1a1 1 0 0 0 0-2H7a1 1 0 0 0 0 2h1v5a3 3 0 0 1-3 3v2h5.97v7l1 1 1-1v-7H19v-2a3 3 0 0 1-3-3Z"/></svg></button>
+      <button class="ia" data-act="clean"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M3 5h18v2H3V5Zm0 6h12v2H3v-2Zm0 6h18v2H3v-2Zm16.3-7.7 1.4 1.4-2.3 2.3 2.3 2.3-1.4 1.4-2.3-2.3-2.3 2.3-1.4-1.4 2.3-2.3-2.3-2.3 1.4-1.4 2.3 2.3 2.3-2.3Z"/></svg></button>
+      <button class="ia" data-act="tools"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4Zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4Z"/></svg></button>
+      <button class="ia del" data-act="delete"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z"/></svg></button>
+    </div>
+  </li>
+</template>
+<script type="module" src="popup.js"></script>
+</body>
+</html>
