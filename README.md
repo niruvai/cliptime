@@ -41,6 +41,8 @@
 
 ভুল পেলে বা নতুন ফিচার চাইলে [Issue খুলুন](https://github.com/niruvai/cliptime/issues)। কোড উন্নত করতে চাইলে [CONTRIBUTING.md](CONTRIBUTING.md) দেখুন — Pull Request স্বাগতম।
 
+সরাসরি যোগাযোগ: [nirob@nirobislam.com](mailto:nirob@nirobislam.com)
+
 ```bash
 node --test tests/*.test.mjs   # টেক্সট টুলের টেস্ট
 ```
